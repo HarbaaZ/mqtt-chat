@@ -10,7 +10,7 @@ const Chat = ({ client, name, topic }) => {
             const selectedUser = message.replace(/ joined the chat !/, '');
             if (message.includes('joined the chat !') && !users.includes(selectedUser)) {
                 const selectedUser = message.replace(/ joined the chat !/, '');
-                setUsers(users => [...users, selectedUser])
+                setUsers([...new Set(users), selectedUser]);
             }
 
             if (message.includes('left the chat !') && !users.includes(selectedUser)) {
@@ -23,10 +23,18 @@ const Chat = ({ client, name, topic }) => {
     useEffect(() => {
         client.on('message', (selectedTopic, message) => {
             if (selectedTopic === topic) {
-                setMessageList(messages => [...messages, message.toString()]);
+                setMessageList(messageList => [...messageList, message.toString()]);
             }
         });
-    }, [client, topic]);
+    }, [client, messageList, topic]);
+
+    useEffect(() => {
+        if (messageList.length > 1) {
+            if (messageList[messageList.length - 1] === messageList[messageList.length - 2]) {
+                setMessageList(messageList => messageList.filter((message, index) => index !== messageList.length - 1));
+            }
+        }
+    }, [messageList])
 
     const sendMessage = () => {
         client.publish(topic, `${name}: ${message}`);

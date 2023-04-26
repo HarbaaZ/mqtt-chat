@@ -6,13 +6,11 @@ import Chat from './components/chat';
 
 function App() {
   const [client, setClient] = useState();
-  const [isUserAuth, setIsUserAuth] = useState(false);
   const [name, setName] = useState('');
 
   const handleUserAuth = async () => {
     if (name.trim() !== '') {
       await connectToBrocker();
-      setIsUserAuth(true)
     }
   }
 
