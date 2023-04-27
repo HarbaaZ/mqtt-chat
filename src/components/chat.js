@@ -10,7 +10,7 @@ const Chat = ({ client, name, topic }) => {
             const selectedUser = message.replace(/ joined the chat !/, '')
             if (message.includes('joined the chat !') && !users.includes(selectedUser)) {
                 const selectedUser = message.replace(/ joined the chat !/, '')
-                setUsers([...new Set(users), selectedUser])
+                setUsers(users => [...users, selectedUser])
             }
 
             if (message.includes('left the chat !') && !users.includes(selectedUser)) {
@@ -20,21 +20,25 @@ const Chat = ({ client, name, topic }) => {
         });
     }, [messageList, users]);
 
-    useEffect(() => {
-        client.on('message', (selectedTopic, message) => {
-            if (selectedTopic === topic) {
-                setMessageList(messageList => [...messageList, message.toString()])
-            }
-        });
-    }, [client, messageList, topic]);
+    const receiveMessage = (selectedTopic, message) => {
+        console.log(selectedTopic, message.toString(), topic)
+        console.log(selectedTopic === topic)
+        if (selectedTopic === topic) {
+            setMessageList(messageList => [...messageList, message.toString()])
+        }
+    }
 
     useEffect(() => {
-        if (messageList.length > 1) {
-            if (messageList[messageList.length - 1] === messageList[messageList.length - 2]) {
-                setMessageList(messageList => messageList.filter((message, index) => index !== messageList.length - 1))
-            }
-        }
-    }, [messageList])
+        client.on('message', receiveMessage);
+
+        return () => {
+            client.removeListener('message', receiveMessage);
+        };
+    }, [client, topic]);
+
+    useEffect(() => {
+        setMessageList([]);
+    }, [topic])
 
     const sendMessage = () => {
         client.publish(topic, `${topic} ${name}: ${message}`)
