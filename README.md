@@ -1,7 +1,7 @@
 
 # MQTT Chat
 
-Cette application a été developpé en React JS, et utilise la technologie MQTT afin de créer un chat.
+Cette application a été developpé en React JS, et utilise la technologie MQTT via le brocker HiveMQ afin de créer un chat.
 
 ## Fonctionnalités
 
