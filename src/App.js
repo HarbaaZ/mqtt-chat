@@ -32,7 +32,6 @@ function App() {
       client.on('connect', () => {
         client.subscribe('general', { qos: 1 })
         client.subscribe('oneToOne/#')
-        client.subscribe('invitation/#')
         client.publish('general', `${name} joined the chat !`)
         setClient(client)
         console.log('Connected');

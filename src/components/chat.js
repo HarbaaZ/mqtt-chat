@@ -22,7 +22,6 @@ const Chat = ({ client, name, topic, setTopics, setSelectedTopic, topics }) => {
     }, [messageList, users]);
 
     const receiveMessage = (selectedTopic, message) => {
-        console.log(selectedTopic, message.toString())
         if (message.toString().includes('invited you to a private chat !')) {
             const selectedUser = message.toString().replace(/ invited you to a private chat !/, '')
             if (selectedUser !== name) {
@@ -61,15 +60,16 @@ const Chat = ({ client, name, topic, setTopics, setSelectedTopic, topics }) => {
     }, [topic])
 
     const sendMessage = () => {
-        console.log(`${topic} - ${name}: ${message}`)
         client.publish(topic, `${topic} - ${name}: ${message}`)
         setMessage('');
     };
 
     const startOneToOne = (user) => {
-        const selectedTopic = `oneToOne/${name}/${user}`
-        client.subscribe(selectedTopic)
-        client.publish(selectedTopic, `${name} invited you to a private chat !`)
+        if (user !== name) {
+            const selectedTopic = `oneToOne/${name}/${user}`
+            client.subscribe(selectedTopic)
+            client.publish(selectedTopic, `${name} invited you to a private chat !`)
+        }
     }
 
     const leaveChat = () => {
