@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 
 const Chat = ({ client, name, topic }) => {
-    const [users, setUsers] = useState([]);
-    const [messageList, setMessageList] = useState([]);
-    const [message, setMessage] = useState('');
+    const [users, setUsers] = useState([])
+    const [messageList, setMessageList] = useState([])
+    const [message, setMessage] = useState('')
 
     useEffect(() => {
         messageList.forEach(message => {
-            const selectedUser = message.replace(/ joined the chat !/, '');
+            const selectedUser = message.replace(/ joined the chat !/, '')
             if (message.includes('joined the chat !') && !users.includes(selectedUser)) {
-                const selectedUser = message.replace(/ joined the chat !/, '');
-                setUsers([...new Set(users), selectedUser]);
+                const selectedUser = message.replace(/ joined the chat !/, '')
+                setUsers([...new Set(users), selectedUser])
             }
 
             if (message.includes('left the chat !') && !users.includes(selectedUser)) {
-                const selectedUser = message.replace(/ left the chat !/, '');
+                const selectedUser = message.replace(/ left the chat !/, '')
                 setUsers(users => users.filter(user => user !== selectedUser));
             }
         });
@@ -23,7 +23,7 @@ const Chat = ({ client, name, topic }) => {
     useEffect(() => {
         client.on('message', (selectedTopic, message) => {
             if (selectedTopic === topic) {
-                setMessageList(messageList => [...messageList, message.toString()]);
+                setMessageList(messageList => [...messageList, message.toString()])
             }
         });
     }, [client, messageList, topic]);
@@ -31,13 +31,13 @@ const Chat = ({ client, name, topic }) => {
     useEffect(() => {
         if (messageList.length > 1) {
             if (messageList[messageList.length - 1] === messageList[messageList.length - 2]) {
-                setMessageList(messageList => messageList.filter((message, index) => index !== messageList.length - 1));
+                setMessageList(messageList => messageList.filter((message, index) => index !== messageList.length - 1))
             }
         }
     }, [messageList])
 
     const sendMessage = () => {
-        client.publish(topic, `${name}: ${message}`);
+        client.publish(topic, `${topic} ${name}: ${message}`)
         setMessage('');
     };
 

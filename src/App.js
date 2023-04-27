@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
-import toast, { Toaster } from 'react-hot-toast';
+import React, { useState } from 'react'
+import toast, { Toaster } from 'react-hot-toast'
 import './App.css'
 import mqtt from 'precompiled-mqtt'
-import Chat from './components/chat';
+import Chat from './components/chat'
 
 function App() {
-  const [client, setClient] = useState();
-  const [name, setName] = useState('');
+  const [client, setClient] = useState()
+  const [name, setName] = useState('')
+  const [topics, setTopics] = useState(['general'])
+  const [topic, setTopic] = useState('')
+  const [selectedTopic, setSelectedTopic] = useState(0)
 
   const handleUserAuth = async () => {
     if (name.trim() !== '') {
@@ -27,9 +30,9 @@ function App() {
       );
 
       client.on('connect', () => {
-        client.subscribe('general', { qos: 1 });
-        client.subscribe('oneToOne/#');
-        client.publish('general', `${name} joined the chat !`);
+        client.subscribe('general', { qos: 1 })
+        client.subscribe('oneToOne/#')
+        client.publish('general', `${name} joined the chat !`)
         setClient(client)
         console.log('Connected');
       });
@@ -47,8 +50,17 @@ function App() {
       });
 
     } catch (err) {
-      console.log(err);
+      console.log(err)
       toast.error('Error while connecting to the brocker')
+    }
+  }
+
+  const subscibeNewTopic = () => {
+    if (topic.trim() !== '' && !topics.includes(topic)) {
+      setTopics([...topics, topic])
+      setTopic('')
+      client.subscribe(topic, { qos: 1 });
+      client.publish(topic, `${name}: vient de se connecter au topic ${topic}`);
     }
   }
 
@@ -65,7 +77,21 @@ function App() {
             <input type='text' value={name} onChange={(e) => setName(e.target.value)} />
             <button onClick={() => handleUserAuth()}>Submit</button>
           </div>
-          : <Chat client={client} name={name} topic='general' />
+          : <div>
+            <h1>{topics[selectedTopic]}</h1>
+
+            <Chat client={client} name={name} topic={topics[selectedTopic]} />
+            {
+              topics.map((topic, index) => (
+                <div key={index} onClick={() => setSelectedTopic(index)}>
+                  {topic}
+                </div>
+              ))
+            }
+            <h3>Create a topic</h3>
+            <input type='text' value={topic} onChange={(e) => setTopic(e.target.value)} />
+            <button onClick={() => subscibeNewTopic()}>Create</button>
+          </div>
       }
     </>
   );
