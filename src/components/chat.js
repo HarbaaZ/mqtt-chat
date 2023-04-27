@@ -38,6 +38,9 @@ const Chat = ({ client, name, topic, setTopics, setSelectedTopic, topics }) => {
         if (message.toString().includes('accepted your invitation !')) {
             const selectedUser = message.toString().replace(/ accepted your invitation !/, '')
             if (selectedUser !== name) {
+                toast(`${selectedUser} a accepté votre invitation !`, {
+                    icon: '👏',
+                });
                 setTopics(topics => [...topics, `oneToOne/${name}/${selectedUser}`])
             }
         }
@@ -73,7 +76,7 @@ const Chat = ({ client, name, topic, setTopics, setSelectedTopic, topics }) => {
     }
 
     const leaveChat = () => {
-        client.publish(topic, `${name} left the chat !`)
+        client.publish(topic, `${name} left the topic !`)
         client.unsubscribe(topic)
         setTopics(topics.filter(selectedTopic => selectedTopic !== topic))
         setSelectedTopic(0)
