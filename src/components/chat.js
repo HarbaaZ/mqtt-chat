@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
 
-const Chat = ({ client, name, topic }) => {
+const Chat = ({ client, name, topic, setTopics, setSelectedTopic, topics }) => {
     const [users, setUsers] = useState([])
     const [messageList, setMessageList] = useState([])
     const [message, setMessage] = useState('')
@@ -21,8 +22,27 @@ const Chat = ({ client, name, topic }) => {
     }, [messageList, users]);
 
     const receiveMessage = (selectedTopic, message) => {
-        console.log(selectedTopic, message.toString(), topic)
-        console.log(selectedTopic === topic)
+        console.log(selectedTopic, message.toString())
+        if (message.toString().includes('invited you to a private chat !')) {
+            const selectedUser = message.toString().replace(/ invited you to a private chat !/, '')
+            if (selectedUser !== name) {
+                const selectedTopic = `oneToOne/${selectedUser}/${name}`
+                client.subscribe(selectedTopic)
+                client.publish(selectedTopic, `${name} accepted your invitation !`)
+                setTopics(topics => [...topics, `oneToOne/${selectedUser}/${name}`])
+                toast(`Vous avez reçu une invitation de ${selectedUser}!`, {
+                    icon: '👏',
+                });
+            }
+        }
+
+        if (message.toString().includes('accepted your invitation !')) {
+            const selectedUser = message.toString().replace(/ accepted your invitation !/, '')
+            if (selectedUser !== name) {
+                setTopics(topics => [...topics, `oneToOne/${name}/${selectedUser}`])
+            }
+        }
+
         if (selectedTopic === topic) {
             setMessageList(messageList => [...messageList, message.toString()])
         }
@@ -41,9 +61,23 @@ const Chat = ({ client, name, topic }) => {
     }, [topic])
 
     const sendMessage = () => {
-        client.publish(topic, `${topic} ${name}: ${message}`)
+        console.log(`${topic} - ${name}: ${message}`)
+        client.publish(topic, `${topic} - ${name}: ${message}`)
         setMessage('');
     };
+
+    const startOneToOne = (user) => {
+        const selectedTopic = `oneToOne/${name}/${user}`
+        client.subscribe(selectedTopic)
+        client.publish(selectedTopic, `${name} invited you to a private chat !`)
+    }
+
+    const leaveChat = () => {
+        client.publish(topic, `${name} left the chat !`)
+        client.unsubscribe(topic)
+        setTopics(topics.filter(selectedTopic => selectedTopic !== topic))
+        setSelectedTopic(0)
+    }
 
     return (
         <>
@@ -56,11 +90,14 @@ const Chat = ({ client, name, topic }) => {
             }
             <input type='text' value={message} onChange={e => setMessage(e.target.value)} />
             <button onClick={() => sendMessage()}>Send</button>
+            {
+                topic !== 'general' && <button onClick={() => leaveChat()}>Leave</button>
+            }
             <br />
-            Online users
+            <h3>Online users</h3>
             {
                 users.map((user, index) => (
-                    <div key={index}>
+                    <div key={index} onClick={() => startOneToOne(user)}>
                         {user}
                     </div>
                 ))

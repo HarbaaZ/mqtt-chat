@@ -81,7 +81,14 @@ function App() {
           : <div>
             <h1>{topics[selectedTopic]}</h1>
 
-            <Chat client={client} name={name} topic={topics[selectedTopic]} />
+            <Chat
+              client={client}
+              name={name}
+              topic={topics[selectedTopic]}
+              topics={topics}
+              setTopics={setTopics}
+              setSelectedTopic={setSelectedTopic} />
+              <h3>Topics</h3>
             {
               topics.map((topic, index) => (
                 <div key={index} onClick={() => setSelectedTopic(index)}>
